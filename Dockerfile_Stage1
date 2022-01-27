@@ -1,0 +1,22 @@
+FROM docker.io/node:14.18-alpine
+WORKDIR /app
+RUN mkdir -p /app/node_modules
+ENV PATH /app/node_modules/.bin:$PATH
+COPY package.json ./
+COPY package-lock.json ./
+
+RUN npm cache clean --force
+
+RUN rm ./package-lock.json
+
+RUN npm install
+
+RUN chmod a+x /app/node_modules
+
+
+RUN npm install react-scripts --save
+RUN chmod +x node_modules/.bin/react-scripts
+
+COPY . .
+
+RUN npm run build

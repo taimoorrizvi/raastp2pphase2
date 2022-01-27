@@ -1,0 +1,48 @@
+FROM docker.io/node:14.18-alpine AS nodebuild
+WORKDIR /app
+RUN mkdir -p /app/node_modules
+ENV PATH /app/node_modules/.bin:$PATH
+COPY package.json ./
+COPY package-lock.json ./
+
+#RUN npm i @coreui/coreui
+#RUN npm i @coreui/react@4.0.0-rc.0
+#RUN npm i @coreui/react-chartjs@1.1.0
+#RUN npm i @craco/craco@6.3.0
+#RUN npm i @testing-library/jest-dom@5.14.1
+#RUN npm i @testing-library/react@11.2.7
+#RUN npm i @testing-library/user-event@12.8.3
+#RUN npm i axios@0.21.4
+#RUN npm i react@17.0.2
+#RUN npm i react-dom@17.0.2
+#RUN npm i react-router-dom@5.3.0
+#RUN npm i react-scripts@4.0.3
+#RUN npm i request@2.88.2
+#RUN npm i web-vitals@1.1.2
+
+RUN npm cache clean --force
+
+RUN rm ./package-lock.json
+
+RUN npm install
+
+RUN chmod a+x /app/node_modules
+
+
+RUN npm install react-scripts --save
+RUN chmod +x node_modules/.bin/react-scripts
+
+
+#RUN npm ci --silent
+#RUN npm install react-scripts@3.4.1 -g --silent
+
+COPY . .
+
+RUN npm run build
+
+# production environment
+#FROM nginx:stable-alpine
+FROM nginx:latest
+COPY --FROM=nodebuild /app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
